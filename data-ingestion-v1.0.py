@@ -47,7 +47,7 @@ if not os.path.exists(persistent_directory):
     print(f"Number of document chunks: {len(docs_split)}", end="\n\n")
 
     ## embedding and vector store
-    embedF = HuggingFaceEmbeddings() ## <- open-source embedding model from HuggingFace - taking the default model only
+    embedF = HuggingFaceEmbeddings(model_name = "all-MiniLM-L6-v2") ## <- open-source embedding model from HuggingFace - taking the default model only
     print("[INFO] Started embedding", end="\n")
     start = time.time() ## <- noting the starting time
 
