@@ -22,4 +22,4 @@ vectorDB = FAISS.from_documents(embedding=embedF, documents=documentSplit)
 ## saving the knowledge-base locally
 vectorDB.save_local("vector-store")
 
-print("Succesfully saved!!")
+print("[INFO] Succesfully saved")

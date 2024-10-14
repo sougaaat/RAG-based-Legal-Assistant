@@ -17,12 +17,12 @@ persistent_directory = os.path.join(current_dir_path, "data-ingestion-local") ##
 
 ## checking if the directory already exists
 if not os.path.exists(persistent_directory):
-    print("Initiating the build of Vector Database .. 📌📌", end="\n\n")
+    print("[INFO] Initiating the build of Vector Database .. 📌📌", end="\n\n")
 
     ## checking if the folder that contains the required PDFs exists
     if not os.path.exists(data_path):
         raise FileNotFoundError(
-            f"⚠️⚠️ {data_path} doesn't exist."
+            f"[ALERT] {data_path} doesn't exist. ⚠️⚠️"
         )
 
     ## list of all the PDFs
@@ -48,7 +48,7 @@ if not os.path.exists(persistent_directory):
 
     ## embedding and vector store
     embedF = HuggingFaceEmbeddings() ## <- open-source embedding model from HuggingFace - taking the default model only
-    print("----Started embedding----", end="\n")
+    print("[INFO] Started embedding", end="\n")
     start = time.time() ## <- noting the starting time
 
     """
@@ -60,8 +60,8 @@ if not os.path.exists(persistent_directory):
                                      persist_directory=persistent_directory)
     
     end = time.time() ## <- noting the end time
-    print("----Finished embedding----", end="\n")
-    print(f"Time taken: {end - start}")
+    print("[INFO] Finished embedding", end="\n")
+    print(f"[ADD. INFO] Time taken: {end - start}")
 
 else:
-    print("Vector Database already exist. ️⚠️")
+    print("[ALERT] Vector Database already exist. ️⚠️")
