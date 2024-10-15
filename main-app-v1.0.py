@@ -46,7 +46,7 @@ def reset_conversation():
     st.session_state['memory'].clear()
 
 ## open-source embedding model from HuggingFace - taking the default model only
-embedF = HuggingFaceEmbeddings()
+embedF = HuggingFaceEmbeddings(model_name = "all-MiniLM-L6-v2")
 
 ## loading the vector database from local
 vectorDB = Chroma(embedding_function=embedF, persist_directory=persistent_directory)
