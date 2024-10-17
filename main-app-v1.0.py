@@ -39,7 +39,7 @@ if "messages" not in st.session_state:
 
 # resetting the entire conversation
 def reset_conversation():
-    st.session_state['messages'].clear()
+    st.session_state['messages'] = []
 
 ## cohere chat model
 llm = ChatCohere(
@@ -135,7 +135,7 @@ if user_query:
     with st.chat_message("assistant"):
         with st.status("Generating 💡...", expanded=True):
             ## invoking the chain to fetch the result
-            result = coversational_rag_chain.invoke({"input": user_query, "chat_history": reset_conversation})
+            result = coversational_rag_chain.invoke({"input": user_query, "chat_history": st.session_state['messages']})
 
             message_placeholder = st.empty()
 
@@ -151,7 +151,7 @@ if user_query:
             time.sleep(0.02) ## <- simulate the output feeling of ChatGPT
 
             message_placeholder.markdown(full_response + " ▌")
-        st.button('Reset Conversation 🗑️', on_click=st.session_state['messages'].clear())
+        st.button('Reset Conversation 🗑️', on_click=reset_conversation)
     ## appending conversation turns
     st.session_state.messages.extend(
         [
