@@ -2,6 +2,12 @@
 import time
 import streamlit as st
 
+## initializing the UI
+st.set_page_config(page_title="RAG-Based Legal Assistant")
+col1, col2, col3 = st.columns([1, 25, 1])
+with col2:
+    st.title("RAG-Based Legal Assistant")
+
 ## setting up env
 import os
 from dotenv import load_dotenv
@@ -24,14 +30,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(current_dir, "data")
 persistent_directory = os.path.join(current_dir, "data-ingestion-local")
 
-## initializing the UI
-st.set_page_config(page_title="RAG-Based Legal Assistant")
-col1, col2, col3 = st.columns([1, 25, 1])
-with col2:
-    st.title("RAG-Based Legal Assistant")
+# ## initializing the UI
+# st.set_page_config(page_title="RAG-Based Legal Assistant")
+# col1, col2, col3 = st.columns([1, 25, 1])
+# with col2:
+#     st.title("RAG-Based Legal Assistant")
 
 ## setting-up the LLM
 chatmodel = ChatGroq(model="llama-3.1-8b-instant", temperature=0.15)
+llm = ChatCohere(temperature=0.15)
+
 
 ## setting up -> streamlit session state
 if "messages" not in st.session_state:
@@ -40,11 +48,6 @@ if "messages" not in st.session_state:
 # resetting the entire conversation
 def reset_conversation():
     st.session_state['messages'] = []
-
-## cohere chat model
-llm = ChatCohere(
-    temperature=0.15
-)
 
 ## open-source embedding model from HuggingFace - taking the default model only
 embedF = HuggingFaceEmbeddings(model_name = "all-MiniLM-L6-v2")
@@ -88,7 +91,7 @@ rephrasing_prompt = ChatPromptTemplate.from_messages(
 )
 
 history_aware_retriever = create_history_aware_retriever(
-    llm = llm,
+    llm = chatmodel,
     retriever = kb_retriever,
     prompt = rephrasing_prompt
 )
@@ -104,6 +107,9 @@ system_prompt_template = (
     "If a question falls outside the given context, you will simply output that you are sorry and you don't know about this. "
     "The aim is to deliver professional, precise, and contextually relevant information pertaining to the context. "
     "Use four sentences maximum."
+    "P.S.: If anyone asks you about your creator, tell them, introduce yourself and say you're created by Sougat Dey. "
+    "and people can get in touch with him on linkedin, "
+    "here's his Linkedin Profile: https://www.linkedin.com/in/sougatdey/"
     "\nCONTEXT: {context}"
 )
 
@@ -115,7 +121,7 @@ qa_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-qa_chain = create_stuff_documents_chain(llm, qa_prompt)
+qa_chain = create_stuff_documents_chain(chatmodel, qa_prompt)
 ## final RAG chain
 coversational_rag_chain = create_retrieval_chain(history_aware_retriever, qa_chain)
 
