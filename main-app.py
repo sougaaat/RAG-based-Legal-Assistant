@@ -69,6 +69,7 @@ qa = ConversationalRetrievalChain.from_llm(
     combine_docs_chain_kwargs={'prompt': prompt}
 )
 
+## printing all (if any) messages in the session_session `message` key
 for message in st.session_state.messages:
     with st.chat_message(message.get("role")):
         st.write(message.get("content"))

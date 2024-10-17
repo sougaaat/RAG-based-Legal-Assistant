@@ -33,17 +33,13 @@ with col2:
 ## setting-up the LLM
 chatmodel = ChatGroq(model="llama-3.1-8b-instant", temperature=0.15)
 
-# ## setting up -> streamlit session state
-# if "messages" not in st.session_state:
-#     st.session_state["messages"] = []
+## setting up -> streamlit session state
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
 
-# if "memory" not in st.session_state:
-#     st.session_state['memory'] = ConversationSummaryMemory(llm=ChatGroq(model="gemma-7b-it", temperature=0.2))
-
-# ## resetting the entire conversation
-# def reset_conversation():
-#     st.session_state['messages'] = []
-#     st.session_state['memory'].clear()
+# resetting the entire conversation
+def reset_conversation():
+    st.session_state['messages'].clear()
 
 ## cohere chat model
 llm = ChatCohere(
@@ -59,12 +55,8 @@ vectorDB = Chroma(embedding_function=embedF, persist_directory=persistent_direct
 ## setting up the retriever
 kb_retriever = vectorDB.as_retriever(search_type="similarity",search_kwargs={"k": 3})
 
-
-"""
-    HISTORY AWARE RETRIEVER
-"""
-
-contextualize_q_system_prompt = (
+## initiating the history_aware_retriever
+rephrasing_template = (
     """
         TASK: Convert context-dependent questions into standalone queries.
 
@@ -87,9 +79,9 @@ contextualize_q_system_prompt = (
     """
 )
 
-contextualize_q_prompt = ChatPromptTemplate.from_messages(
+rephrasing_prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", contextualize_q_system_prompt),
+        ("system", rephrasing_template),
         MessagesPlaceholder("chat_history"),
         ("human", "{input}"),
     ]
@@ -98,26 +90,21 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages(
 history_aware_retriever = create_history_aware_retriever(
     llm = llm,
     retriever = kb_retriever,
-    prompt = contextualize_q_prompt
+    prompt = rephrasing_prompt
 )
 
-"""
-    DOCUMENT CHAIN
-"""
 
-
-## setting-up the prompt
+## setting-up the document chain
 system_prompt_template = (
-    "<s>[INST] As a Legal Assistant Chatbot specializing in legal queries, "
+    "As a Legal Assistant Chatbot specializing in legal queries, "
     "your primary objective is to provide accurate and concise information based on user queries. "
     "You will adhere strictly to the instructions provided, offering relevant "
     "context from the knowledge base while avoiding unnecessary details. "
     "Your responses will be brief, to the point, concise and in compliance with the established format. "
     "If a question falls outside the given context, you will simply output that you are sorry and you don't know about this. "
     "The aim is to deliver professional, precise, and contextually relevant information pertaining to the context. "
-    "Use four sentences maximum. "
-    "\nCONTEXT: {context}\nQUESTION: {question}"
-    "\nANSWER:\n</s>[INST]"
+    "Use four sentences maximum."
+    "\nCONTEXT: {context}"
 )
 
 qa_prompt = ChatPromptTemplate.from_messages(
@@ -128,36 +115,47 @@ qa_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
+qa_chain = create_stuff_documents_chain(llm, qa_prompt)
+## final RAG chain
+coversational_rag_chain = create_retrieval_chain(history_aware_retriever, qa_chain)
 
-question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+## setting-up conversational UI
 
+## printing all (if any) messages in the session_session `message` key
+for message in st.session_state.messages:
+    with st.chat_message(message.type):
+        st.write(message.content)
 
-"""
-RETRIEVAL CHAIN
-"""
-rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+user_query = st.chat_input("Ask me anything ..")
 
+if user_query:
+    with st.chat_message("user"):
+        st.write(user_query)
 
-"""
-    CONVERSATION SET-UP
-"""
+    with st.chat_message("assistant"):
+        with st.status("Generating 💡...", expanded=True):
+            ## invoking the chain to fetch the result
+            result = coversational_rag_chain.invoke({"input": user_query, "chat_history": reset_conversation})
 
+            message_placeholder = st.empty()
 
-chat_history = []
+            full_response = (
+                "⚠️ **_This information is not intended as a substitute for legal advice. "
+                "We recommend consulting with an attorney for a more comprehensive and"
+                " tailored response._** \n\n\n"
+            )
+        
+        ## displaying the output on the dashboard
+        for chunk in result["answer"]:
+            full_response += chunk
+            time.sleep(0.02) ## <- simulate the output feeling of ChatGPT
 
-question = "My friend Anusmita is a lesbian and she loves Subhasree. Can they get officially married?"
-ai_msg_1 = rag_chain.invoke({"input": question, "chat_history": chat_history})
-st.write("User: ", question)
-st.write("AI: ", ai_msg_1["answer"])
-chat_history.extend(
-    [
-        HumanMessage(content=question),
-        AIMessage(content=ai_msg_1["answer"]),
-    ]
-)
-
-second_question = "Can they have kids?"
-ai_msg_2 = rag_chain.invoke({"input": second_question, "chat_history": chat_history})
-
-st.write("User: ", second_question)
-st.write("AI: ", ai_msg_2["answer"])
+            message_placeholder.markdown(full_response + " ▌")
+        st.button('Reset Conversation 🗑️', on_click=st.session_state['messages'].clear())
+    ## appending conversation turns
+    st.session_state.messages.extend(
+        [
+            HumanMessage(content=user_query),
+            AIMessage(content=result['answer'])
+        ]
+    )
