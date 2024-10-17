@@ -30,12 +30,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(current_dir, "data")
 persistent_directory = os.path.join(current_dir, "data-ingestion-local")
 
-# ## initializing the UI
-# st.set_page_config(page_title="RAG-Based Legal Assistant")
-# col1, col2, col3 = st.columns([1, 25, 1])
-# with col2:
-#     st.title("RAG-Based Legal Assistant")
-
 ## setting-up the LLM
 chatmodel = ChatGroq(model="llama-3.1-8b-instant", temperature=0.15)
 llm = ChatCohere(temperature=0.15)
