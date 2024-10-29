@@ -2,10 +2,6 @@
 
 A powerful, context-aware legal assistant chatbot built with LangChain and Streamlit. This application uses Retrieval Augmented Generation (RAG) to provide accurate legal information based on your documents while maintaining conversation history.
 
-## ▶️ Demo
-
-<video src="demo.mp4" controls></video>
-
 ## 🌟 Features
 
 - **PDF Document Processing**: Automatically processes and indexes legal PDF documents
