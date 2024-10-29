@@ -4,10 +4,7 @@ A powerful, context-aware legal assistant chatbot built with LangChain and Strea
 
 ## ▶️ Demo
 
-<video width="600" controls>
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<video src="demo.mp4" controls></video>
 
 ## 🌟 Features
 
