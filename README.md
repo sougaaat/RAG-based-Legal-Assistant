@@ -128,11 +128,7 @@ OPENAI_API_KEY=your_openai_api_key_here  # Optional, if using OpenAI models
 
 ## 🎬 Demo
 
-Want to see the Legal Assistant in action? Check out our demo video:
-
-https://github.com/sougaaat/RAG-based-Legal-Assistant/assets/your-username/demo/DEMO.mp4
-
-*Note: Click the video to play it directly on GitHub*
+Want to see the Legal Assistant in action? Navigate to the `demo/` directory and open the `DEMO.mp4` file to watch the demonstration video.
 
 ## 💫 Usage
 
