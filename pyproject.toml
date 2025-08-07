@@ -1,0 +1,17 @@
+[project]
+name = "rag-based-legal-assistant"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "langchain>=0.3.27",
+    "langchain-chroma>=0.2.5",
+    "langchain-cohere>=0.4.5",
+    "langchain-community>=0.3.27",
+    "langchain-huggingface>=0.3.1",
+    "langchain-openai>=0.3.28",
+    "pypdf>=5.9.0",
+    "sentence-transformers>=5.1.0",
+    "streamlit>=1.48.0",
+]
